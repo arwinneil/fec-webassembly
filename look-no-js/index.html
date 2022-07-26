@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<meta http-equiv="Content-Security-Policy"
+		content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
+	<title>Document</title>
+</head>
+
+<script type="module">
+
+	import init from "./pkg/look_no_js.js";
+
+	const runWasm = async () => {
+		const helloWorld = await init("./pkg/look_no_js_bg.wasm");
+		helloWorld.greet();
+
+	};
+
+	runWasm();
+
+</script>
+
+<body>
+
+
+</body>
+
+</html>
