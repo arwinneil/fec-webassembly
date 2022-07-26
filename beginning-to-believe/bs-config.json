@@ -1,0 +1,9 @@
+{
+  "port": 8000,
+  "files": ["./src/**/*.{html,htm,css,js,wasm}"],
+  "cors": true,
+  "headers": {
+    "Cross-Origin-Opener-Policy": "same-origin",
+    "Cross-Origin-Embedder-Policy": "require-corp"
+  }
+}

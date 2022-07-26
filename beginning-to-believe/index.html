@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<meta http-equiv="Content-Security-Policy"
+		content="default-src *  data: blob: filesystem: about: ws: wss: 'unsafe-inline' 'unsafe-eval' ; script-src * data: blob: 'unsafe-inline' 'unsafe-eval'; img-src * data: blob: 'unsafe-inline'; ">
+	<title>Document</title>
+</head>
+
+
+
+<body>
+	<img />
+
+</body>
+
+<script src=" ./ffmpeg.min.js">
+</script>
+
+<script type="module">
+	const { createFFmpeg, fetchFile } = FFmpeg;
+
+	const ffmpeg = createFFmpeg({ log: true, corePath: 'ffmpeg-core/ffmpeg-core.js' });
+	await ffmpeg.load();
+
+	const runWasm = async () => {
+
+		ffmpeg.FS('writeFile', 'test.mp4', await fetchFile("video.mp4"));
+
+		// Run the FFMpeg command
+		await ffmpeg.run('-i', 'test.mp4', '-t', '5', '-ss', '0', '-f', 'gif', 'out.gif');
+
+		// Read the result
+		const data = ffmpeg.FS('readFile', 'out.gif');
+
+		// Create a URL
+		const url = URL.createObjectURL(new Blob([data.buffer], { type: 'image/gif' }));
+
+		document.querySelector('img').setAttribute("src", url);
+	};
+
+	runWasm();
+
+</script>
+
+</html>
