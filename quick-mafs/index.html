@@ -5,7 +5,7 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+	<link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
 	<meta http-equiv="Content-Security-Policy"
 		content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
 	<title>Document</title>
@@ -14,17 +14,40 @@
 <script>
 
 	var importObject = { env: {} };
+	let wasm = WebAssembly.instantiateStreaming(fetch('./target/wasm32-unknown-unknown/debug/quick_mafs.wasm'), importObject);
 
-	WebAssembly.instantiateStreaming(fetch('./target/wasm32-unknown-unknown/debug/quick_mafs.wasm'), importObject)
-		.then(wasm_binary => {
-			var mafs = wasm_binary.instance.exports.add_it(12, 13);
-			console.log(mafs);
+	function calc() {
+
+		const x = document.querySelector("#x").value;
+		const y = document.querySelector("#y").value;
+
+		wasm.then(wasm_binary => {
+			var mafs = wasm_binary.instance.exports.add_it(x, y);
+
+			document.querySelector("h2").innerText = `Sum is ${mafs}`;
 		});
+	}
 
 </script>
 
 <body>
+	<main class="container">
 
+		<h1>Barebones Rust WebAssembly</h1>
+		<label>
+			Input X
+			<input type="number" id="x" required>
+		</label>
+
+		<label>
+			Input Y
+			<input type="number" id="y" required>
+		</label>
+
+		<button type="submit" onclick="calc()">Do Mafs</button>
+
+		<h2></h2>
+	</main>
 
 </body>
 
