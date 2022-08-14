@@ -5,16 +5,48 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
 
 	<meta http-equiv="Content-Security-Policy"
 		content="default-src *  data: blob: filesystem: about: ws: wss: 'unsafe-inline' 'unsafe-eval' ; script-src * data: blob: 'unsafe-inline' 'unsafe-eval'; img-src * data: blob: 'unsafe-inline'; ">
-	<title>Document</title>
+	<title>FFMPEG WASM Demo - Converting video to Gif</title>
 </head>
 
+<style>
+	video::-webkit-media-controls-panel {
+		display: flex !important;
+		opacity: 1 !important;
+	}
 
+	video {
+		width: 100%;
+	}
+</style>
 
 <body>
-	<img />
+	<main class="container">
+		<h1>FFMPEG WASM Demo - Converting video to Gif</h1>
+		<label>
+			Video URL
+			<input type="url" id="videoUrl" value="https://v.redd.it/jiocg8snbgh91/DASH_480.mp4?source=fallback"
+				required>
+		</label>
+		<button class="" onclick="updateUrl()"> Set Video</button>
+
+		<div class="grid" style="margin-bottom: 1em">
+			<div>
+				<p>Video</p>
+				<video src="https://v.redd.it/jiocg8snbgh91/DASH_480.mp4?source=fallback" controls="true"
+					autoplay="true"></video>
+			</div>
+			<div>
+				<p>GIF</p><img />
+			</div>
+		</div>
+
+		<button class="outline secondary" id="convert" onclick="runWasm()">FFMPEG loading, please wait...</button>
+	</main>
+
 
 </body>
 
@@ -25,11 +57,17 @@
 	const { createFFmpeg, fetchFile } = FFmpeg;
 
 	const ffmpeg = createFFmpeg({ log: true, corePath: 'ffmpeg-core/ffmpeg-core.js' });
-	await ffmpeg.load();
+	ffmpeg.load().then(() => {
+		document.querySelector('#convert').innerHTML = "Convert";
+		document.querySelector("#convert").setAttribute("class", "primary");
+
+	});
+
+	var videoUrl = "https://v.redd.it/jiocg8snbgh91/DASH_480.mp4?source=fallback";
 
 	const runWasm = async () => {
 
-		ffmpeg.FS('writeFile', 'test.mp4', await fetchFile("video.mp4"));
+		ffmpeg.FS('writeFile', 'test.mp4', await fetchFile(videoUrl));
 
 		// Run the FFMpeg command
 		await ffmpeg.run('-i', 'test.mp4', '-t', '5', '-ss', '0', '-f', 'gif', 'out.gif');
@@ -43,7 +81,17 @@
 		document.querySelector('img').setAttribute("src", url);
 	};
 
-	runWasm();
+	const updateUrl = () => {
+		videoUrl = document.querySelector("#videoUrl").value;
+		document.querySelector("video").setAttribute("src", videoUrl);
+		document.querySelector("img").setAttribute("src", "");
+
+	}
+
+	window.updateUrl = updateUrl;
+	window.runWasm = runWasm;
+
+	updateUrl();
 
 </script>
 
