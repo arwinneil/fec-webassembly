@@ -58,16 +58,18 @@
 <script type="module">
 	const { createFFmpeg, fetchFile } = FFmpeg;
 
+	var videoUrl = "https://v.redd.it/jiocg8snbgh91/DASH_480.mp4?source=fallback";
+	var busyStatus = true;
+	var file;
+	const btn = document.querySelector("#convert");
+
 	const ffmpeg = createFFmpeg({ log: true, corePath: 'ffmpeg-core/ffmpeg-core.js' });
 	ffmpeg.load().then(() => {
-		document.querySelector('#convert').innerHTML = "Convert";
-		document.querySelector("#convert").setAttribute("class", "primary");
-		document.querySelector("#convert").setAttribute("aria-busy", "false");
-
+		btn.innerHTML = "Convert";
+		toggleBusy();
 	});
 
-	var videoUrl = "https://v.redd.it/jiocg8snbgh91/DASH_480.mp4?source=fallback";
-	var file;
+
 
 	const updateUrl = () => {
 		videoUrl = document.querySelector("#videoUrl").value;
@@ -78,12 +80,14 @@
 
 	const runWasm = async () => {
 
+		toggleBusy();
+
 		// Write file to MEMFS
 		ffmpeg.FS('writeFile', 'video.mp4', await file);
 
 		// Run the FFMpeg command
 		// https://explainshell.com/explain?cmd=ffmpeg+-i+test.mp4+-t+5+-ss+0+-f+gif+out.gif
-		await ffmpeg.run('-i', 'video.mp4', '-ss', '5', '-t', '5', '-f', 'gif', 'result.gif');
+		await ffmpeg.run('-i', 'video.mp4', '-ss', '0', '-t', '5', '-f', 'gif', 'result.gif');
 
 		// Read the result
 		const data = ffmpeg.FS('readFile', 'result.gif');
@@ -92,7 +96,22 @@
 		const url = URL.createObjectURL(new Blob([data.buffer], { type: 'image/gif' }));
 
 		document.querySelector('img').setAttribute("src", url);
+		toggleBusy();
 	};
+
+	const toggleBusy = () => {
+
+		busyStatus = !busyStatus;
+
+		if (busyStatus) {
+			btn.setAttribute("class", "outline secondary");
+		} else {
+			btn.setAttribute("class", "primary");
+		}
+
+		btn.setAttribute("aria-busy", (busyStatus).toString());
+	};
+
 
 	window.updateUrl = updateUrl;
 	window.runWasm = runWasm;
